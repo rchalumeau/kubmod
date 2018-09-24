@@ -1,0 +1,27 @@
+# SRE infratsructure (tsm and bsm)
+.utility.valapp.com
+
+# Infrastructure Azure
+.core.windows.net
+login.microsoftonline.com
+management.azure.com
+168.63.129.16
+
+# Sophos update servers
+dci.sophosupd.com
+d1.sophosupd.com
+d2.sophosupd.com
+d3.sophosupd.com
+dci.sophosupd.net
+d1.sophosupd.net
+d2.sophosupd.net
+d3.sophosupd.net
+
+#Appdynamics controller
+analytics.api.appdynamics.com
+arestrading.saas.appdynamics.com
+
+# Sync ENTRUST SSL chain certificates
+aia.entrust.net
+
+

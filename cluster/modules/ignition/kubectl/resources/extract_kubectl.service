@@ -1,0 +1,21 @@
+[Unit]
+Description=Kubectl extraction from hyperkube
+Requires=docker.service
+After=docker.service
+ConditionPathExists=!/opt/bin/kubectl
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+RestartSec=5s
+ExecStartPre=/bin/mkdir -p /tmp/kubectldir /opt/bin
+ExecStartPre=/usr/bin/docker pull ${hyperkube_image}
+ExecStartPre=/usr/bin/docker run --rm -v /tmp/kubectldir:/opt/kubectldir ${hyperkube_image} /bin/bash -c "cp /kubectl /opt/kubectldir/"
+ExecStartPre=/bin/mv /tmp/kubectldir/kubectl /opt/bin
+ExecStartPre=/usr/bin/echo "alias kl='/opt/bin/kubectl --kubeconfig /etc/kubernetes/kubeconfig.yaml'" > /etc/profile.d/kubectl
+ExecStartPre=/usr/bin/echo "alias ks='/opt/bin/kubectl --kubeconfig /etc/kubernetes/kubeconfig.yaml -n kube-system'" >> /etc/profile.d/kubectl
+ExecStart=/bin/chmod a+x /opt/bin/kubectl
+
+[Install]
+WantedBy=multi-user.target
+

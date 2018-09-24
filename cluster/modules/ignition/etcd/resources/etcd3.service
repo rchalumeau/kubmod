@@ -1,0 +1,36 @@
+[Unit]
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker kill etcd3
+ExecStartPre=-/usr/bin/docker rm etcd3
+ExecStartPre=/usr/bin/docker pull ${etcd_image}
+ExecStart=/usr/bin/docker run \
+  -v /etc/kubernetes/certs/:/etc/kubernetes/certs \
+  -v /opt/etcd/data:/opt/etcd/data \
+  -p 2380:2380 -p 2379:2379 -p 4001:4001 \
+  --network host \
+  --name etcd3 ${etcd_image} \
+  /usr/local/bin/etcd \
+  --data-dir=/opt/etcd/data \
+  --name $${hostname} \
+  --peer-cert-file=/etc/kubernetes/certs/peer.crt \
+  --peer-key-file=/etc/kubernetes/certs/peer.key \
+  --peer-trusted-ca-file=/etc/kubernetes/certs/ca.crt \
+  --advertise-client-urls http://localhost:2379 \
+  --listen-client-urls http://0.0.0.0:2379 \
+  --initial-advertise-peer-urls https://$${hostname}:2380 \
+  --listen-peer-urls https://0.0.0.0:2380 \
+  --initial-cluster-token ${etcd_cluster_token} \
+  --initial-cluster ${cluster_definition} \
+  --initial-cluster-state new
+
+Restart=always
+RestartSec=10
+
+ExecStop=/usr/bin/docker stop etcd3
+
+[Install]
+WantedBy=multi-user.target

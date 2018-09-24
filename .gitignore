@@ -1,0 +1,11 @@
+# Terraform
+**/generated/*
+**/output/*
+**/.terraform/*
+
+*.exe
+*.bin
+*.tfstate*
+*.fg
+*.ppk
+**/bin/*

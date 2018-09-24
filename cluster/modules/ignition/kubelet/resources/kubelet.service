@@ -1,0 +1,53 @@
+[Unit]
+Description=Master Kubelet Service listening API on localhost
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill kubelet
+ExecStartPre=-/usr/bin/docker rm kubelet 
+${wait_for_proxy}
+ExecStart=/usr/bin/docker run \
+  --name=kubelet \
+  --net=host \
+  --pid=host \
+  --privileged \
+  --volume=/dev:/dev \
+  --volume=/sys:/sys:ro \
+  --volume=/var/run:/var/run:rw \
+  --volume=/var/lib/docker/:/var/lib/docker:rw \
+  --volume=/var/lib/kubelet/:/var/lib/kubelet:shared \
+  --volume=/var/log:/var/log:rw \
+  --volume=/etc/kubernetes/:/etc/kubernetes:ro \
+  --volume=/srv/kubernetes/:/srv/kubernetes:ro \
+  --volume=/root/.docker:/root/.docker:ro \
+  ${proxy} \
+  ${noproxy} \
+  ${hyperkube} \
+      	/hyperkube kubelet \
+        --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+        --address=0.0.0.0 \
+        --allow-privileged=true \
+        --enable-server \
+        --enable-debugging-handlers \
+        --pod-manifest-path=/etc/kubernetes/manifests \
+        --cluster-dns=${dns} \
+        --cluster-domain=cluster.local \
+        --cloud-provider=${provider} \
+        --cloud-config=/etc/kubernetes/${provider}.json \
+        --hairpin-mode=promiscuous-bridge \
+        --network-plugin=kubenet \
+        --node-labels="kubernetes.io/role=${role},dedicated=${role}" \
+        --register-node=true \
+        ${schedule == "true" ? "" : "--register-with-taints=dedicated=${role}:NoSchedule"} \
+        --pod-infra-container-image=${pause_image} \
+	--pod-cidr=$${pod_cidr} \
+        --v=1
+ExecStop=/usr/bin/docker stop -t 2 kubelet
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

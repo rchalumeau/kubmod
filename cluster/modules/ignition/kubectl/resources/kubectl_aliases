@@ -1,0 +1,3 @@
+alias kl='/opt/bin/kubectl --kubeconfig /etc/kubernetes/kubeconfig.yaml'
+alias ks='/opt/bin/kubectl --kubeconfig /etc/kubernetes/kubeconfig.yaml -n kube-system'
+

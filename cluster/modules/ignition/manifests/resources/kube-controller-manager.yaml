@@ -1,0 +1,42 @@
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  name: "kube-controller-manager"
+  namespace: "kube-system"
+  labels:
+    tier: control-plane
+    component: kube-controller-manager
+spec:
+  hostNetwork: true
+  containers:
+    - name: "kube-controller-manager"
+      image: "${hyperkube}"
+      env:
+      - name: HTTPS_PROXY
+        value: "http://${proxy}:3128"
+      command:
+        - /hyperkube
+        - controller-manager
+        - --master=127.0.0.1:8080
+        - --kubeconfig=/etc/kubernetes/kubeconfig.yaml
+        - --allocate-node-cidrs=false
+        - --configure-cloud-routes=false
+        - --cluster-cidr=${pod_cidr}
+        - --cluster-name=localcluster
+        - --cloud-provider=azure
+        - --cloud-config=/etc/kubernetes/azure.json
+        - --root-ca-file=/etc/kubernetes/certs/ca.crt
+        - --service-account-private-key-file=/etc/kubernetes/certs/apiserver.key
+        - --v=1
+      volumeMounts:
+        - name: "etc-kubernetes"
+          mountPath: "/etc/kubernetes"
+        - name: "var-lib-kubelet"
+          mountPath: "/var/lib/kubelet"
+  volumes:
+    - name: "etc-kubernetes"
+      hostPath:
+        path: "/etc/kubernetes"
+    - name: "var-lib-kubelet"
+      hostPath:
+        path: "/var/lib/kubelet"
