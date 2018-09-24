@@ -1,4 +1,4 @@
-# MDS Cluster Provisioning with Terraform
+# Cluster Provisioning with Terraform
 
 Doc generated with https://stackedit.io/app
 
